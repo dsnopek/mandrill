@@ -2,13 +2,13 @@
 
 /**
  * @file
- * Implements Mandrill as a Drupal MailSystemInterface
+ * Class for sending mails via Mandrill.
  */
 
 /**
  * Modify the drupal mail system to use Mandrill when sending emails.
  */
-class MandrillMailSystem implements MailSystemInterface {
+class MandrillMailSystem {
 
   /**
    * Concatenate and wrap the email body for either
@@ -40,11 +40,12 @@ class MandrillMailSystem implements MailSystemInterface {
    *   TRUE if the mail was successfully accepted, otherwise FALSE.
    */
   public function mail(array $message) {
+    watchdog('debug', 'mail()');
     if (!$from = variable_get('mandrill_from', '')) {
       drupal_set_message(t('Mandrill can\'t send email. Please !link.',
         array(
           '!link' => l('add a verified from address',
-            'admin/config/services/mandrill'
+            'admin/settings/mandrill'
           )
         )
       ), 'error');
@@ -52,7 +53,9 @@ class MandrillMailSystem implements MailSystemInterface {
     }
 
     // send the email passing the message id as the tag for use in reporting
+    watchdog('debug', 'before api');
     $mailer = mandrill_get_api_object();
+    watchdog('debug', 'after api');
 
     // apply input format to body
     $html = $message['body'];
@@ -122,7 +125,7 @@ class MandrillMailSystem implements MailSystemInterface {
  *
  * This class is for running tests or for development.
  */
-class TestingMandrillMailSystem extends MandrillMailSystem implements MailSystemInterface {
+class TestingMandrillMailSystem extends MandrillMailSystem {
 
   /**
    * Accept an e-mail message and store it in a variable.
@@ -178,5 +181,20 @@ function mandrill_get_to($to) {
     $recipients[] = array('email' => $to);
   }
   return $recipients;
+}
+
+/**
+ * Implements drupal_mail_wrapper().
+ */
+function drupal_mail_wrapper($message) {
+  watchdog('debug', 'called');
+  $mandrill_status = variable_get('mandrill_status', MANDRILL_STATUS_ON);
+  $mandrill = ($mandrill_status == MANDRILL_STATUS_TEST) ?
+    new TestingMandrillMailSystem() : new MandrillMailSystem();
+  watchdog('debug', 'created');
+
+  $message = $mandrill->format($message);
+  watchdog('debug', 'formatted');
+  return $mandrill->mail($message);
 }
 

@@ -53,23 +53,16 @@ class Mandrill {
     $dot_output = ('json' == $output) ? '' : ".{$output}";
 
     $url = self::END_POINT . "{$api_version}/{$method}{$dot_output}";
-    $params = drupal_json_encode($args);
+    $params = drupal_to_js($args);
 
     switch ($http) {
       case 'GET':
         $url .= '?' . $params;
-        $response = drupal_http_request($url, array(
-          'method' => 'GET',
-          'timeout' => $this->timeout,
-        ));
+        $response = drupal_http_request($url, array(), 'GET', NULL, 3, $this->timeout);
         break;
 
       case 'POST':
-        $response = drupal_http_request($url, array(
-          'method' => 'POST',
-          'data' => $params,
-          'timeout' => $this->timeout,
-        ));
+        $response = drupal_http_request($url, array(), 'POST', $params, 3, $this->timeout);
         break;
 
       default:

@@ -28,7 +28,7 @@ function mandrill_help($path, $arg) {
  * Implements hook_menu().
  */
 function mandrill_menu() {
-  $items['admin/config/services/mandrill'] = array(
+  $items['admin/settings/mandrill'] = array(
     'title' => 'Mandrill',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mandrill_admin_settings'),
@@ -37,12 +37,12 @@ function mandrill_menu() {
     'file' => 'mandrill.admin.inc',
     'type' => MENU_NORMAL_ITEM,
   );
-  $items['admin/config/services/mandrill/settings'] = array(
+  $items['admin/settings/mandrill/settings'] = array(
     'title' => 'Settings',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => 0
   );
-  $items['admin/config/services/mandrill/test'] = array(
+  $items['admin/settings/mandrill/test'] = array(
     'title' => 'Send test email',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mandrill_test_form'),
@@ -67,9 +67,9 @@ function mandrill_test_access() {
 }
 
 /**
- * Implements hook_permission().
+ * Implements hook_perm().
  */
-function mandrill_permission() {
+function mandrill_perm() {
   return array(
     'administer mandrill' => array(
       'title' => t('Administer Mandrill'),
@@ -86,7 +86,7 @@ function mandrill_mail($key, &$message, $params) {
     $message['subject'] = $params['subject'];
     $message['body'] = $params['body'];
     if ($params['include_attachment']) {
-      $message['attachments'][] = drupal_realpath('misc/druplicon.png');
+      $message['attachments'][] = realpath('misc/druplicon.png');
       $message['body'] .= '  ' . t('The Drupal icon is included as an attachment to test the attachment functionality.');
     }
   }
@@ -119,6 +119,8 @@ function mandrill_get_api_object() {
   if (empty($api_key)) {
     return FALSE;
   }
+
+  require_once('mandrill.class.php');
 
   $api = new Mandrill($api_key, 60);
 

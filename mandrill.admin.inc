@@ -11,8 +11,8 @@
  * @return
  *   An array containing form items to place on the module settings page.
  */
-function mandrill_admin_settings($form, &$form_state) {
-  $key = variable_get('mandrill_api_key');
+function mandrill_admin_settings(&$form_state) {
+  $key = variable_get('mandrill_api_key', '');
   $form['mandrill_api_key'] = array(
     '#title' => t('Mandrill API Key'),
     '#type' => 'textfield',
@@ -65,7 +65,7 @@ function mandrill_admin_settings($form, &$form_state) {
       '#title' => t('Input format'),
       '#description' => t('If selected, the input format to apply to the message body before sending to the Mandrill API.'),
       '#options' => $options,
-      '#default_value' => array(variable_get('mandrill_filter_format', 'full_html')),
+      '#default_value' => array(variable_get('mandrill_filter_format', FILTER_FORMAT_DEFAULT)),
     );
 
     $form['send_options'] = array(
@@ -127,19 +127,23 @@ function mandrill_admin_settings($form, &$form_state) {
 function mandrill_admin_settings_submit($form, &$form_state) {
   $values = $form_state['values'];
 
+  $mail_inc = drupal_get_path('module', 'mandrill') . '/mandrill.mail.inc';
+
   switch ($form_state['values']['mandrill_status']) {
     case MANDRILL_STATUS_ON:
-      variable_set('mail_system', array('default-system' => 'MandrillMailSystem'));
+      variable_set('smtp_library', $mail_inc);
       drupal_set_message(t('Mandrill will be used to deliver all site emails.'));
       watchdog('mandrill', 'Mandrill has been enabled.');
       break;
     case MANDRILL_STATUS_TEST:
-      variable_set('mail_system', array('default-system' => 'TestingMandrillMailSystem'));
+      variable_set('smtp_library', $mail_inc);
       drupal_set_message(t('Mandrill will be used in test mode. Emails will not actually be sent, just logged.'));
       watchdog('mandrill', 'Mandrill has been placed in test mode.');
       break;
     case MANDRILL_STATUS_OFF:
-      variable_set('mail_system', array('default-system' => 'DefaultMailSystem'));
+      if (variable_get('smtp_library', '') == $mail_inc) {
+        variable_del('smtp_library');
+      }
       drupal_set_message(t('The default mail system will be used to deliver all site emails.'));
       watchdog('mandrill', 'Mandrill has been disabled.');
       break;
@@ -154,7 +158,7 @@ function mandrill_admin_settings_submit($form, &$form_state) {
  *
  * @return array $form
  */
-function mandrill_test_form($form, &$form_state) {
+function mandrill_test_form(&$form_state) {
   drupal_set_title(t('Send test email'));
 
   $form['mandrill_test_address'] = array(
