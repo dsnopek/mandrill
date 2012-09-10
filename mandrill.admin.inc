@@ -65,7 +65,7 @@ function mandrill_admin_settings(&$form_state) {
       '#title' => t('Input format'),
       '#description' => t('If selected, the input format to apply to the message body before sending to the Mandrill API.'),
       '#options' => $options,
-      '#default_value' => array(variable_get('mandrill_filter_format', FILTER_FORMAT_DEFAULT)),
+      '#default_value' => array(variable_get('mandrill_filter_format', '')),
     );
 
     $form['send_options'] = array(

@@ -40,7 +40,6 @@ class MandrillMailSystem {
    *   TRUE if the mail was successfully accepted, otherwise FALSE.
    */
   public function mail(array $message) {
-    watchdog('debug', 'mail()');
     if (!$from = variable_get('mandrill_from', '')) {
       drupal_set_message(t('Mandrill can\'t send email. Please !link.',
         array(
@@ -53,9 +52,7 @@ class MandrillMailSystem {
     }
 
     // send the email passing the message id as the tag for use in reporting
-    watchdog('debug', 'before api');
     $mailer = mandrill_get_api_object();
-    watchdog('debug', 'after api');
 
     // apply input format to body
     $html = $message['body'];
@@ -187,14 +184,11 @@ function mandrill_get_to($to) {
  * Implements drupal_mail_wrapper().
  */
 function drupal_mail_wrapper($message) {
-  watchdog('debug', 'called');
   $mandrill_status = variable_get('mandrill_status', MANDRILL_STATUS_ON);
   $mandrill = ($mandrill_status == MANDRILL_STATUS_TEST) ?
     new TestingMandrillMailSystem() : new MandrillMailSystem();
-  watchdog('debug', 'created');
 
   $message = $mandrill->format($message);
-  watchdog('debug', 'formatted');
   return $mandrill->mail($message);
 }
 
