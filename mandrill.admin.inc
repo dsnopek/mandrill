@@ -186,7 +186,7 @@ function mandrill_test_form(&$form_state) {
   );
   $form['test_cancel'] = array(
     '#type' => 'link',
-    '#href' => 'admin/config/services/mandrill',
+    '#href' => 'admin/settings/mandrill',
     '#title' => t('Cancel'),
   );
 

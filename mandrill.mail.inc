@@ -58,7 +58,7 @@ class MandrillMailSystem {
     $html = $message['body'];
     $format = variable_get('mandrill_filter_format', '');
     if (!empty($format)) {
-      $html = check_markup($message['body'], $format);
+      $html = check_markup($message['body'], $format, FALSE);
     }
 
     $to = mandrill_get_to($message['to']);
@@ -135,7 +135,7 @@ class TestingMandrillMailSystem extends MandrillMailSystem {
       drupal_set_message(t('Mandrill can\'t send email. Please !link.',
         array(
           '!link' => l('add a verified from address',
-            'admin/config/services/mailchimp/sts'
+            'admin/settings/mandrill',
           )
         )
       ), 'error');
