@@ -135,7 +135,7 @@ class TestingMandrillMailSystem extends MandrillMailSystem {
       drupal_set_message(t('Mandrill can\'t send email. Please !link.',
         array(
           '!link' => l('add a verified from address',
-            'admin/settings/mandrill',
+            'admin/settings/mandrill'
           )
         )
       ), 'error');
