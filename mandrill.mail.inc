@@ -5,6 +5,10 @@
  * Class for sending mails via Mandrill.
  */
 
+function _mandrill_remove_newlines($matches) {
+  return str_replace(array("\n", "\r"), ' ', $matches[0]);
+}
+
 /**
  * Modify the drupal mail system to use Mandrill when sending emails.
  */
@@ -25,6 +29,13 @@ class MandrillMailSystem {
     if (is_array($message['body'])) {
       $message['body'] = implode("\n\n", $message['body']);
     }
+
+    // Undoes damage to the HTML e-mail done by drupal_wrap_mail() because this can break
+    // check_markup() depending on the filters you're using -- particularly the newline filter.
+    // Ideally, we'd run check_markup() before the message is passed to drupal_wrap_mail(), but
+    // I don't see a good way to do that!
+    $message['body'] = preg_replace_callback('/<[^<>]*>/s', '_mandrill_remove_newlines', $message['body']);
+
     return $message;
   }
 
