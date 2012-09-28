@@ -46,7 +46,7 @@ function mandrill_admin_settings(&$form_state) {
       '#title' => t('From address'),
       '#type' => 'textfield',
       '#description' => t('The sender email address. If this address has not been verified, messages will be queued and not sent until it is.'),
-      '#default_value' => variable_get('mandrill_from', variable_get('site_mail'))
+      '#default_value' => variable_get('mandrill_from', variable_get('site_mail', ''))
     );
     $form['email_options']['mandrill_from_name'] = array(
       '#type' => 'textfield',
